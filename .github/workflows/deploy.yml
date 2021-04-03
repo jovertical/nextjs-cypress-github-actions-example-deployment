@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  chrome-integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Checkout
+        uses: actions/checkout@v2
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          key: integration-test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: |
+            ~/.cache/Cypress
+            node_modules
+      - name: Install dependencies
+        run: npm install
+      - name: Execute tests
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm run dev
+          browser: chrome
+          headless: true
+
+  firefox-integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Checkout
+        uses: actions/checkout@v2
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          key: integration-test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: |
+            ~/.cache/Cypress
+            node_modules
+      - name: Install dependencies
+        run: npm install
+      - name: Execute tests
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm run dev
+          browser: firefox
+          headless: true
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs: [chrome-integration-test, firefox-integration-test]
+
+    steps:
+      - name: Setup Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      # Deploy
+
